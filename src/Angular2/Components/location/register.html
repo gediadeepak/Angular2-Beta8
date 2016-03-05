@@ -1,0 +1,383 @@
+﻿<div class="container">
+    <form (ngSubmit)=" gotoConfirm()" [ngFormModel]="form" #f="ngForm">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h1>Register your details</h1>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="col-xs-4">
+                        Enter your First Name :
+                    </div>
+                    <div class="col-xs-8">
+                        <input id="fname" type="text" [ngModel]="fname" ngControl="fname" />
+                        <img src="/angular2-beta/content/images/redwarning.png" style="width:20px" *ngIf="f.form.controls.fname.touched && !f.form.controls.fname.valid" alt="Please enter first name" />
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="col-xs-4">
+                        Enter your Last Name :
+                    </div>
+                    <div class="col-xs-8">
+                        <input type="text" id="lname" [ngModel]="lname" ngControl="lname" />
+                        <img src="/angular2-beta/content/images/redwarning.png" style="width:20px" *ngIf="f.form.controls.lname.touched && !f.form.controls.lname.valid" alt="Please enter Last name" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="col-xs-4">
+                        Address type :
+                    </div>
+                    <div class="col-xs-8">
+                        <select id="type" [ngModel]="type" ngControl="type">
+                            <option [value]="'home'">Home Address</option>
+                            <option [value]="'billing'">Billing Address</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="col-xs-4">
+                        Enter your Address
+                    </div>
+                    <div class="col-xs-8">
+                        <input type="text" [ngModel]="address" id="address" ngControl="address" />
+                        <img src="/angular2-beta/content/images/redwarning.png" style="width:20px" *ngIf="f.form.controls.address.touched && !f.form.controls.address.valid" alt="Please enter your Address" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="col-xs-4">
+
+                    </div>
+                    <div class="col-xs-8">
+                        <button type="submit" [disabled]="!f.form.valid">Next</button>
+                        <img src="/angular2-beta/content/images/loading_spinner.gif" style="border:0;width:40px;" [hidden]="!showLoading" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <tabs>
+        <tab [tabTitle]="'register.ts'">
+            <pre>
+            import {Component} from 'angular2/core';
+            import {RouteParams} from 'angular2/router';
+            import { Inject} from 'angular2/core';
+            import {ROUTER_DIRECTIVES, RouteConfig, Location, ROUTER_BINDINGS, LocationStrategy, HashLocationStrategy, Route, AsyncRoute, Router} from 'angular2/router';
+            import {Confirm} from './confirm'
+            import {ThankYou} from './thankyou'
+            import {Registration} from './registrationObject'
+            import {RegisterService} from './registerService'
+            import {FORM_DIRECTIVES, FormBuilder, CORE_DIRECTIVES, Validators, ControlGroup} from 'angular2/common'
+            import {Http, HTTP_PROVIDERS, Response} from 'angular2/http';
+            import {Tabs} from '../tabs/tabs';
+            import {Tab} from '../tabs/tab';
+            @Component({
+                selector: 'register',
+                directives: [ROUTER_DIRECTIVES, FORM_DIRECTIVES, CORE_DIRECTIVES, Tabs, Tab],
+                templateUrl: './components/location/register.html',
+                providers: [RegisterService]
+            })
+     
+            export class Register {
+                location: any;
+                form;
+                payload=null;
+                showLoading: boolean = false;
+                formBuilder: FormBuilder;
+                result: any;
+                regdata: any;
+                registrationService: RegisterService;
+                fname: string = '';
+                lname: string = '';
+                type: string = 'home';
+                address: string = '';
+                constructor( @Inject(Location) private locationObj: Location,
+                    @Inject(Router) private router: Router,
+                    @Inject(RegisterService) private regService: RegisterService,
+                    @Inject(FormBuilder) private fb: FormBuilder) {
+                    this.location = locationObj;
+                    this.registrationService = regService;
+                    this.formBuilder = fb;
+                    this.getRegistrationDetails();
+       
+                    this.form = this.formBuilder.group({
+                        "fname": [this.fname, Validators.required],
+                        "lname": [this.lname, Validators.required],
+                        "type": [this.type],
+                        "address": [this.address, Validators.required]
+                    });
+        
+                }
+                gotoConfirm() {
+                    let self = this;
+                    self.showLoading = true;
+                    this.payload = JSON.stringify(this.form.value);
+                    var registration = new Registration(this.form.controls.fname.value, this.form.controls.lname.value, this.form.controls.type.value, this.form.controls.address.value);
+                    this.registrationService.saveRegistrationDetails(registration).map((res: Response) => res.json()).subscribe(function (res) {
+                        self.showLoading = false;
+                        self.result = res;
+                        console.log(self.result)
+                        if (self.result.RegDetails.DataSaved == true) {
+                            self.registrationService.setReturnedResult(self.result);
+                            self.router.navigateByUrl('/Register/Confirm');
+                        }
+                    });
+        
+                }
+                getRegistrationDetails() {
+                    let self = this;
+                    self.showLoading = true;
+                    this.registrationService.getRegistrationDetails().map((res: Response) => res.json()).subscribe(res=> this.mapResult(res));
+                }
+                mapResult(data) {
+                    this.regdata = data.registrationDetails;
+                    console.log(this.regdata);
+                    if (this.regdata != null) {
+                        this.fname = this.regdata.FirstName;
+                        this.lname = this.regdata.LastName;
+                        this.type = this.regdata.Type;
+                        this.address = this.regdata.Address;
+                    }
+                    this.showLoading = false;
+                }
+            }
+    </pre>
+        </tab>
+        <tab tabTitle="registerService.ts">
+            <pre>
+            import {Component, View} from 'angular2/core';
+            import { Inject} from 'angular2/core';
+            import {Http, Response, Headers} from 'angular2/http';
+            import {Registration} from './registrationObject'
+            export class RegisterService {
+                result: Object;
+                returnedResult: any;
+                constructor( @Inject(Http) private http: Http) {
+                }
+                saveRegistrationDetails(registerObj: Registration) {
+                    var headers = new Headers();
+                    headers.append('Content-Type', 'application/json');
+                    var path = '/angular2/Api/Registration/SaveRegistrationDetails';
+                    return this.http.post(path, JSON.stringify(registerObj), { headers: headers });
+                }
+                getRegistrationDetails() {
+                    var headers = new Headers();
+                    headers.append('Content-Type', 'application/json');
+                    var path = '/angular2/Api/registration/GetRegistrationDetails';
+                    return this.http.get(path);
+                }
+                logError(err) {
+                    console.log(err);
+                }
+                setReturnedResult(retResult) {
+                    this.returnedResult = retResult;
+                }
+                getReturnedResult() { return this.returnedResult;}
+            }
+        </pre>
+        </tab>
+        <tab tabTitle="confirm.ts">
+            <pre>
+            import {Component} from 'angular2/core';
+            import { Inject} from 'angular2/core';
+            import {RouteParams, ROUTER_DIRECTIVES, RouteConfig, Location, ROUTER_BINDINGS, LocationStrategy, HashLocationStrategy, Route, AsyncRoute, Router} from 'angular2/router';
+            import {Http, HTTP_PROVIDERS, Response} from 'angular2/http';
+            import {ThankYou} from './thankyou'
+            import {RegisterService} from './registerService'
+            import {Registration} from './registrationObject'
+            @Component({
+                selector: 'confirm',
+                directives: [ROUTER_DIRECTIVES],
+                templateUrl: './components/location/confirm.html',
+                providers: [RegisterService]
+            })
+            export class Confirm {
+                location: any;
+                registerService: RegisterService;
+                result = new Registration();
+                showLoading:boolean=false;
+                memoryObject: any;
+                constructor( @Inject(Location) private locationObj: Location,
+                    @Inject(Router) public router: Router,
+                    @Inject(RegisterService) private regService: RegisterService) {
+                    this.location = locationObj;
+                    this.registerService = regService;
+                    this.getRegistrationDetails();
+                }
+                getRegistrationDetails() {
+                    let self = this;
+                    self.showLoading = true;
+                    this.registerService.getRegistrationDetails().map((res: Response) => res.json()).subscribe(res=> this.mapResult(res));
+                }
+                mapResult(data) {
+                    this.result = data.registrationDetails;
+                    console.log(this.result);
+                    this.showLoading = false;
+                }
+                gotoThankYou() {
+                    this.router.navigateByUrl('/Register/ThankYou');
+                }
+                gotoRegister() {
+                    this.router.navigateByUrl('/Register/..');
+                }
+            }
+        </pre>
+        </tab>
+
+        <tab tabTitle="register.html">
+            <pre>
+                &lt;form (ngSubmit)=" gotoConfirm()" [ngFormModel]="form" #f="ngForm"&gt;
+                &lt;div class="container"&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-xs-12"&gt;
+                            &lt;h1&gt;Register your details&lt;/h1&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;hr /&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-xs-6"&gt;
+                            &lt;div class="col-xs-4"&gt;
+                                Enter your First Name :
+                            &lt;/div&gt;
+                            &lt;div class="col-xs-8"&gt;
+                                &lt;input id="fname" type="text" [ngModel]="fname" ngControl="fname" /&gt;
+                                &lt;img src="/angular2-beta/content/images/redwarning.png" style="width:20px" *ngIf="f.form.controls.fname.touched && !f.form.controls.fname.valid" alt="Please enter first name" /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-xs-6"&gt;
+                            &lt;div class="col-xs-4"&gt;
+                                Enter your Last Name :
+                            &lt;/div&gt;
+                            &lt;div class="col-xs-8"&gt;
+                                &lt;input type="text" id="lname" [ngModel]="lname" ngControl="lname" /&gt;
+                                &lt;img src="/angular2-beta/content/images/redwarning.png" style="width:20px" *ngIf="f.form.controls.lname.touched && !f.form.controls.lname.valid" alt="Please enter Last name" /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-xs-6"&gt;
+                            &lt;div class="col-xs-4"&gt;
+                                Address type :
+                            &lt;/div&gt;
+                            &lt;div class="col-xs-8"&gt;
+                                &lt;select id="type" [ngModel]="type" ngControl="type"&gt;
+                                    &lt;option [value]="'home'"&gt;Home Address&lt;/option&gt;
+                                    &lt;option [value]="'billing'"&gt;Billing Address&lt;/option&gt;
+                                &lt;/select&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-xs-6"&gt;
+                            &lt;div class="col-xs-4"&gt;
+                                Enter your Address
+                            &lt;/div&gt;
+                            &lt;div class="col-xs-8"&gt;
+                                &lt;input type="text" [ngModel]="address" id="address" ngControl="address" /&gt;
+                                &lt;img src="/angular2-beta/content/images/redwarning.png" style="width:20px" *ngIf="f.form.controls.address.touched && !f.form.controls.address.valid" alt="Please enter your Address" /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-xs-6"&gt;
+                            &lt;div class="col-xs-4"&gt;
+                            &lt;/div&gt;
+                            &lt;div class="col-xs-8"&gt;
+                                &lt;button type="submit" [disabled]="!f.form.valid"&gt;Next&lt;/button&gt;
+                                &lt;img src="/angular2-beta/content/images/loading_spinner.gif" style="border:0;width:40px;" [hidden]="!showLoading" /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        </pre>
+        </tab>
+        <tab tabTitle="confirm.html">
+            <pre>
+                            &lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-xs-12"&gt;
+            &lt;h1&gt;Confirm your Registration details&lt;/h1&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;hr /&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-xs-6"&gt;
+            &lt;div class="col-xs-4"&gt;
+                Enter your First Name :
+            &lt;/div&gt;
+            &lt;div class="col-xs-8"&gt;
+                &lt;img src="/angular2-beta/content/images/loading_spinner.gif" style="border:0;width:40px;" [hidden]="!showLoading" /&gt; %7b%7bresult.FirstName%7D%7D
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-xs-6"&gt;
+            &lt;div class="col-xs-4"&gt;
+                Enter your Last Name :
+            &lt;/div&gt;
+            &lt;div class="col-xs-8"&gt;
+                &lt;img src="/angular2-beta/content/images/loading_spinner.gif" style="border:0;width:40px;" [hidden]="!showLoading" /&gt; %7b%7bresult.LastName%7D%7D
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-xs-6"&gt;
+            &lt;div class="col-xs-4"&gt;
+                your Type :
+            &lt;/div&gt;
+            &lt;div class="col-xs-8"&gt;
+                &lt;img src="/angular2-beta/content/images/loading_spinner.gif" style="border:0;width:40px;" [hidden]="!showLoading" /&gt; %7b%7bresult.Type%7D%7D
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-xs-6"&gt;
+            &lt;div class="col-xs-4"&gt;
+                Enter your Address
+            &lt;/div&gt;
+            &lt;div class="col-xs-8"&gt;
+                &lt;img src="/angular2-beta/content/images/loading_spinner.gif" style="border:0;width:40px;" [hidden]="!showLoading" /&gt; %7b%7bresult.Address%7D%7D
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="row"&gt;&nbsp;&lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-xs-6"&gt;
+            &lt;div class="col-xs-4"&gt;
+                &lt;button (click)="gotoRegister()"&gt;Edit&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="col-xs-8"&gt;
+                &lt;button (click)="gotoThankYou()"&gt;Next&lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+        </pre>
+        </tab>
+    </tabs>
+</div>

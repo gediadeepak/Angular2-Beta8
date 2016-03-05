@@ -1,0 +1,18 @@
+﻿<div class="container">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div>
+                <ul class="nav navbar-nav">
+                    <li [class.active]="getLinkStyle('')"><a [routerLink]="['/Home']" class="link">Home</a></li>
+                    <li [class.active]="getLinkStyle('/demo')"><a [routerLink]="['/Demo/About']" class="link">Routing</a></li>
+                    <li [class.active]="getLinkStyle('/http')"><a [routerLink]="['/Http']" class="link">Http Sample</a></li>
+                    <li [class.active]="getLinkStyle('/Register')"><a [routerLink]="['/Register']" class="link">Location</a></li>
+                    <li [class.active]="getLinkStyle('/Tab')"><a [routerLink]="['/Tab']" class="link">Components</a></li>
+                    <li [class.active]="getLinkStyle('/DynamicLoad')"><a [routerLink]="['/DynamicLoad']" class="link">Dynamic Loading</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<router-outlet></router-outlet>

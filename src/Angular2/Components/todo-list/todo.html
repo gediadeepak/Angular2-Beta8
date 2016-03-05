@@ -1,0 +1,153 @@
+﻿<p>Please enter the item in the list below</p>
+<table class="table">
+    <thead>
+        <tr>
+            <td>ToDo list</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="#list of toDoList; #i = index" style="margin-bottom: 10px;">
+            <td><input type="checkbox" #comleted (change)="completedList(list,comleted.checked,i)" /></td>
+            <td>{{list.name}}</td>
+            <td><button class="btn btn-primary btn-xs" (click)="removeContact(list)">Delete</button></td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-xs-3"><input #name placeholder="name" type="text" id="txtTodo" /></div>
+    <div class="col-xs-3"><button (click)="addContact(name.value)">Add</button></div>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <td>Completed ToDo list</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="#list of completed; #i = index" style="margin-bottom: 10px;">
+
+            <td>{{list.name}}</td>
+
+        </tr>
+    </tbody>
+</table>
+<tabs>
+    <tab [tabTitle]="'ToDOList.ts'">
+        <pre>
+        import {Component, View} from 'angular2/core';
+        import {ToDo} from './todo';
+        import {Tabs} from '../tabs/tabs';
+        import {Tab} from '../tabs/tab';
+        @Component({
+            selector: 'contact-list',
+    
+        })
+        @View({
+            templateUrl: './components/todo-list/todo.html',
+            directives: [Tabs, Tab]
+        })
+        export class ToDoList {
+            toDoList: Array&lt;ToDo&gt; = [];
+            completed: Array&lt;ToDo&gt; = [];
+            taskComplete: string = '';
+    
+            addContact(name: string) {
+                const contact = new ToDo(name);
+                this.toDoList.push(contact);
+            }
+            removeContact(contact) {
+                const index = this.toDoList.indexOf(contact);
+                this.toDoList.splice(index, 1);
+                for (var n = 0; n <= this.completed.length - 1; n++) {
+                    if (this.completed[n].name == contact.name) {
+                        this.completed.splice(n, 1);
+                    }
+                }
+            }
+            completedList(contact, add: boolean, index: string) {
+    
+                if (add) {
+                    this.completed.push(contact);
+                } else {
+                    for (var n = 0; n <= this.completed.length - 1; n++) {
+                        if (this.completed[n].name == contact.name)
+                        {
+                            this.completed.splice(n, 1);
+                        }
+                    }
+                }
+                for (var n = 0; n <= this.completed.length - 1; n++) {
+                    this.taskComplete += this.completed[n].name;
+                }
+            }
+        }
+    </pre>
+    </tab>
+    <tab tabTitle="ToDo.ts">
+        <pre>
+    export class ToDo 
+    {
+        descr = this.name;
+        constructor(public name: string) 
+        {
+        }
+    }
+ 
+        </pre>
+    </tab>
+    <tab tabTitle="todo.html">
+        <pre style="overflow:scroll;white-space:pre-wrap;">
+        &lt;p&gt;Please enter the item in the list below&lt;/p&gt;
+        &lt;table class="table"&gt;
+            &lt;thead&gt;
+                &lt;tr&gt;
+                    &lt;td&gt;ToDo list&lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+                &lt;tr *ngFor="#list of toDoList; #i = index" style="margin-bottom: 10px;"&gt;
+                    &lt;td&gt;&lt;input type="checkbox" #comleted (change)="completedList(list,comleted.checked,i)" /&gt;&lt;/td&gt;
+                    &lt;td&gt;%7B%7Blist.name%7D%7D&lt;/td&gt;
+                    &lt;td&gt;&lt;button class="btn btn-primary btn-xs" (click)="removeContact(contact)"&gt;Delete&lt;/button&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/tbody&gt;
+        &lt;/table&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-xs-3"&gt;&lt;input #name placeholder="name" type="text" id="txtTodo" /&gt;&lt;/div&gt;
+            &lt;div class="col-xs-3"&gt;&lt;button (click)="addContact(name.value)"&gt;Add&lt;/button&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;table class="table"&gt;
+            &lt;thead&gt;
+                &lt;tr&gt;
+                    &lt;td&gt;Completed ToDo list&lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+                &lt;tr *ngFor="#list of completed; #i = index" style="margin-bottom: 10px;"&gt;
+                    &lt;td&gt;%7B%7Blist.name%7D%7D&lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/tbody&gt;
+        &lt;/table&gt;
+        &lt;tabs&gt;
+            &lt;tab [tabTitle]="'ToDOList.ts'"&gt;
+                &lt;pre&gt;
+        
+            &lt;/pre&gt;
+            &lt;/tab&gt;
+            &lt;tab tabTitle="ToDo.ts"&gt;
+                &lt;pre&gt;
+             
+                &lt;/pre&gt;
+            &lt;/tab&gt;
+            &lt;tab tabTitle="todo.html"&gt;
+                &lt;pre&gt;
+             
+                &lt;/pre&gt;
+            &lt;/tab&gt;
+        &lt;/tabs&gt;
+        </pre>
+    </tab>
+</tabs>
