@@ -1,4 +1,6 @@
-﻿import 'rxjs/operator/map';
+﻿///<reference path="/node_modules/angular2/typings/browser.d.ts"/>
+
+import 'rxjs/operator/map';
 import 'rxjs/operator/mergeMap';
 import 'rxjs/observable/interval'
 

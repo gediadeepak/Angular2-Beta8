@@ -130,7 +130,6 @@
   <ItemGroup>
     <Content Include="Views\web.config" />
     <Content Include="packages.config" />
-    <Content Include="bower.bowerrec" />
     <Content Include="bower.json" />
     <Content Include="package.json" />
     <None Include="Web.Debug.config">
